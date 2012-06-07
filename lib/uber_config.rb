@@ -73,7 +73,7 @@ module UberConfig
 
   end
 
-  def load_from(cf)
+  def self.load_from(cf)
     puts "Checking for config file at #{cf}..."
     if File.exist?(cf)
       config = YAML::load_file(cf)
