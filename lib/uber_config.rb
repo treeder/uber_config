@@ -24,12 +24,17 @@ module UberConfig
       file = options[:file]
     end
 
+    working_directory = Dir.pwd
+    #puts "working_dir: " + working_directory
+
     #p Kernel.caller
     caller_file = caller[0][0...(caller[0].index(":in"))]
     caller_file = caller_file[0...(caller_file.rindex(":"))]
     #p caller_file
     caller_dir = File.dirname(caller_file)
-    #p caller_dir
+    #puts "caller_dir: " + caller_dir
+    caller_dir = File.expand_path(caller_dir)
+    #puts "caller_dir: " + caller_dir
     caller_dir_split = caller_dir.split("/")
     #p caller_dir_split
     auto_dir_name = caller_dir_split.last
@@ -37,14 +42,13 @@ module UberConfig
       caller_dir_split.pop
       auto_dir_name = caller_dir_split.last
     end
-    #p auto_dir_name
 
     # Now check near caller file
     dir_and_file = dir.nil? ? [] : dir.dup
     dir_and_file << file
-    #p dir_and_file
+    p dir_and_file
     location = File.join(dir_and_file)
-    #p location
+    p location
     cf = File.expand_path(location, caller_dir)
     @config = load_from(cf)
     return @config if @config
@@ -53,6 +57,8 @@ module UberConfig
     cf = File.expand_path(location)
     @config = load_from(cf)
     return @config if @config
+
+    puts "auto_dir_name: #{auto_dir_name}"
 
 
     # Now check in Dropbox
