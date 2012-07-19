@@ -60,7 +60,6 @@ module UberConfig
 
     puts "auto_dir_name: #{auto_dir_name}"
 
-
     # Now check in Dropbox
     dropbox_folders = ["~", "Dropbox", "configs"]
     if dir
@@ -74,8 +73,7 @@ module UberConfig
     return @config if @config
 
     # couldn't find it
-    puts "Could not find config file."
-    return nil
+    raise "UberConfig could not find config file!"
 
   end
 
@@ -83,8 +81,29 @@ module UberConfig
     puts "Checking for config file at #{cf}..."
     if File.exist?(cf)
       config = YAML::load_file(cf)
+      # the following makes it indifferent access, but doesn't seem to for inner hashes
+      #config.default_proc = proc do |h, k|
+      #  case k
+      #    when String then sym = k.to_sym; h[sym] if h.key?(sym)
+      #    when Symbol then str = k.to_s; h[str] if h.key?(str)
+      #  end
+      #end
       return config
     end
     nil
+  end
+
+  # Destructively convert all keys to symbols, as long as they respond to to_sym.
+  # inspired by activesupport
+  def self.symbolize_keys!(hash)
+    keys = hash.keys
+    keys.each do |key|
+      v = hash.delete(key)
+      if v.is_a?(Hash)
+        v = symbolize_keys!(v)
+      end
+      hash[(key.to_sym rescue key) || key] = v
+    end
+    hash
   end
 end
