@@ -9,4 +9,10 @@ class TestUberConfig < Test::Unit::TestCase
     p @config
   end
 
+  def test_symbolize
+    x = {"hello"=>"there", :hi=>"yo"}
+    UberConfig.symbolize_keys!(x)
+    p x
+  end
+
 end

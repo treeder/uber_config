@@ -106,4 +106,28 @@ module UberConfig
     end
     hash
   end
+
+  # Non destructive, returns new hash.
+  def self.symbolize_keys(hash)
+    keys = hash.keys
+    ret = {}
+    keys.each do |key|
+      v = hash[key]
+      if v.is_a?(Hash)
+        v = symbolize_keys(v)
+      end
+      ret[(key.to_sym rescue key) || key] = v
+    end
+    ret
+  end
+
+  def self.make_indifferent(hash)
+    hash.default_proc = proc do |h, k|
+      case k
+        when String then sym = k.to_sym; h[sym] if h.key?(sym)
+        when Symbol then str = k.to_s; h[str] if h.key?(str)
+      end
+    end
+  end
+
 end
