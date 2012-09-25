@@ -104,8 +104,8 @@ module UberConfig
   end
 
   def self.set_default_proc(hash)
-    puts 'setting default proc'
-    p hash
+    #puts 'setting default proc'
+    #p hash
     hash.default_proc = proc do |h, k|
       case k
         when String
