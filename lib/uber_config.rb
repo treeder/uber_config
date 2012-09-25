@@ -1,3 +1,4 @@
+require 'yaml'
 require "uber_config/version"
 
 module UberConfig
