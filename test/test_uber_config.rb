@@ -7,6 +7,18 @@ class TestUberConfig < Test::Unit::TestCase
   def test_loading
     @config = UberConfig.load
     p @config
+
+    assert_equal "value", @config['ymlx']
+    assert_equal "value", @config[:ymlx]
+    p @config[:outer]
+    assert_equal "inside", @config[:outer][:inner]
+
+    @config = UberConfig.load(:ext=>'json')
+    p @config
+    assert_equal "value", @config['jsonx']
+    assert_equal "value", @config[:jsonx]
+
+
   end
 
   def test_symbolize

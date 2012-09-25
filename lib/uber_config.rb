@@ -3,9 +3,13 @@ require "uber_config/version"
 module UberConfig
 
   # Load a config file from various system locations
+  # Options:
+  #   :file => filename, default is config.yml and config.json
+  #   :dir => directory to look for in the default locations
+  #   :ext => extension, either yml or json. Default will check both.
   def self.load(options={})
 
-    # First check for abt config
+    # First check for abt config: https://github.com/iron-io/abt
     if defined? $abt_config
       puts "$abt_config found."
       @config = $abt_config
@@ -19,12 +23,10 @@ module UberConfig
         dir = [dir]
       end
     end
-    file = "config.yml"
-    if options[:file]
-      file = options[:file]
-    end
+    ext = options[:ext] || "yml"
+    file = options[:file] || "config.#{ext}"
 
-    working_directory = Dir.pwd
+    #working_directory = Dir.pwd
     #puts "working_dir: " + working_directory
 
     #p Kernel.caller
@@ -46,9 +48,9 @@ module UberConfig
     # Now check near caller file
     dir_and_file = dir.nil? ? [] : dir.dup
     dir_and_file << file
-    p dir_and_file
+    #p dir_and_file
     location = File.join(dir_and_file)
-    p location
+    #p location
     cf = File.expand_path(location, caller_dir)
     @config = load_from(cf)
     return @config if @config
@@ -58,7 +60,7 @@ module UberConfig
     @config = load_from(cf)
     return @config if @config
 
-    puts "auto_dir_name: #{auto_dir_name}"
+    #puts "auto_dir_name: #{auto_dir_name}"
 
     # Now check in Dropbox
     dropbox_folders = ["~", "Dropbox", "configs"]
@@ -82,15 +84,29 @@ module UberConfig
     if File.exist?(cf)
       config = YAML::load_file(cf)
       # the following makes it indifferent access, but doesn't seem to for inner hashes
-      #config.default_proc = proc do |h, k|
-      #  case k
-      #    when String then sym = k.to_sym; h[sym] if h.key?(sym)
-      #    when Symbol then str = k.to_s; h[str] if h.key?(str)
-      #  end
-      #end
+      set_default_proc(config)
       return config
     end
     nil
+  end
+
+  def self.set_default_proc(hash)
+    puts 'setting default proc'
+    p hash
+    hash.default_proc = proc do |h, k|
+      case k
+        when String
+          sym = k.to_sym; h[sym] if h.key?(sym)
+        when Symbol
+          str = k.to_s; h[str] if h.key?(str)
+      end
+    end
+    hash.each_pair do |k,v|
+      if v.is_a?(Hash)
+        set_default_proc(v)
+      end
+    end
+
   end
 
   # Destructively convert all keys to symbols, as long as they respond to to_sym.
