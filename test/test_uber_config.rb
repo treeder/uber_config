@@ -18,6 +18,11 @@ class TestUberConfig < Test::Unit::TestCase
     assert_equal "value", @config['jsonx']
     assert_equal "value", @config[:jsonx]
 
+    @config = UberConfig.load(:file=>"config2")
+    p @config
+    assert_equal "value2", @config['jsonx']
+    assert_equal "value2", @config[:jsonx]
+
 
   end
 

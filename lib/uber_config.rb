@@ -4,7 +4,7 @@ module UberConfig
 
   # Load a config file from various system locations
   # Options:
-  #   :file => filename, default is config.yml and config.json
+  #   :file => filename, default is 'config' which means it will look for both config.yml and config.json. You can use the full filename like 'config.json'
   #   :dir => directory to look for in the default locations
   #   :ext => extension, either yml or json. Default will check both.
   def self.load(options={})
@@ -23,11 +23,20 @@ module UberConfig
         dir = [dir]
       end
     end
-    ext = options[:ext] || "yml"
-    file = options[:file] || "config.#{ext}"
 
-    #working_directory = Dir.pwd
-    #puts "working_dir: " + working_directory
+    file = options[:file] || "config"
+    ext = options[:ext]
+    filenames = []
+    if file.include?(".") # then has extension
+      filenames << file
+    else
+      if ext
+        filenames << "#{file}.#{ext}"
+      else
+        filenames << "#{file}.yml"
+        filenames << "#{file}.json"
+      end
+    end
 
     #p Kernel.caller
     caller_file = caller[0][0...(caller[0].index(":in"))]
@@ -46,33 +55,36 @@ module UberConfig
     end
 
     # Now check near caller file
-    dir_and_file = dir.nil? ? [] : dir.dup
-    dir_and_file << file
-    #p dir_and_file
-    location = File.join(dir_and_file)
-    #p location
-    cf = File.expand_path(location, caller_dir)
-    @config = load_from(cf)
-    return @config if @config
+    filenames.each do |file|
+      dir_and_file = dir.nil? ? [] : dir.dup
+      dir_and_file << file
+      #p dir_and_file
+      location = File.join(dir_and_file)
+      #p location
+      cf = File.expand_path(location, caller_dir)
+      @config = load_from(cf)
+      return @config if @config
 
-    # and working directory
-    cf = File.expand_path(location)
-    @config = load_from(cf)
-    return @config if @config
+      # and working directory
+      cf = File.expand_path(location)
+      @config = load_from(cf)
+      return @config if @config
 
-    #puts "auto_dir_name: #{auto_dir_name}"
+    end
 
     # Now check in Dropbox
-    dropbox_folders = ["~", "Dropbox", "configs"]
-    if dir
-      dropbox_folders = dropbox_folders + dir
-    else
-      dropbox_folders = dropbox_folders << auto_dir_name
+    filenames.each do |file|
+      dropbox_folders = ["~", "Dropbox", "configs"]
+      if dir
+        dropbox_folders = dropbox_folders + dir
+      else
+        dropbox_folders = dropbox_folders << auto_dir_name
+      end
+      dropbox_folders << file
+      cf = File.expand_path(File.join(dropbox_folders))
+      @config = load_from(cf)
+      return @config if @config
     end
-    dropbox_folders << file
-    cf = File.expand_path(File.join(dropbox_folders))
-    @config = load_from(cf)
-    return @config if @config
 
     # couldn't find it
     raise "UberConfig could not find config file!"
@@ -101,7 +113,7 @@ module UberConfig
           str = k.to_s; h[str] if h.key?(str)
       end
     end
-    hash.each_pair do |k,v|
+    hash.each_pair do |k, v|
       if v.is_a?(Hash)
         set_default_proc(v)
       end
@@ -140,8 +152,10 @@ module UberConfig
   def self.make_indifferent(hash)
     hash.default_proc = proc do |h, k|
       case k
-        when String then sym = k.to_sym; h[sym] if h.key?(sym)
-        when Symbol then str = k.to_s; h[str] if h.key?(str)
+        when String then
+          sym = k.to_sym; h[sym] if h.key?(sym)
+        when Symbol then
+          str = k.to_s; h[str] if h.key?(str)
       end
     end
   end
