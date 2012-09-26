@@ -1,7 +1,20 @@
 require 'yaml'
+require 'logger'
 require "uber_config/version"
 
 module UberConfig
+
+  @@logger = Logger.new(STDOUT)
+  @@logger.level = Logger::INFO
+
+  def self.logger
+    @@logger
+  end
+
+  def self.logger=(l)
+    @@logger = l
+  end
+
 
   # Load a config file from various system locations
   # Options:
@@ -12,9 +25,20 @@ module UberConfig
 
     # First check for abt config: https://github.com/iron-io/abt
     if defined? $abt_config
-      puts "$abt_config found."
+      logger.info "$abt_config found."
       @config = $abt_config
       return @config
+    end
+
+    if ENV['CONFIG_CACHE_KEY']
+      logger.info "ENV[CONFIG_CACHE_KEY] found."
+      logger.debug "Getting config from #{ENV['CONFIG_CACHE_KEY']}"
+      config_from_cache = open(ENV['CONFIG_CACHE_KEY']).read
+      config_from_cache = JSON.parse(config_from_cache)
+      config_from_cache = YAML.load(config_from_cache['value'])
+      logger.info  "Got config from cache."
+      set_default_proc(config_from_cache)
+      return config_from_cache
     end
 
     dir = nil
@@ -93,7 +117,7 @@ module UberConfig
   end
 
   def self.load_from(cf)
-    puts "Checking for config file at #{cf}..."
+    logger.info "Checking for config file at #{cf}..."
     if File.exist?(cf)
       config = YAML::load_file(cf)
       # the following makes it indifferent access, but doesn't seem to for inner hashes
