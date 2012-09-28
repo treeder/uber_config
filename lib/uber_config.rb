@@ -1,6 +1,6 @@
 require 'yaml'
 require 'logger'
-require "uber_config/version"
+require 'uber_config/version'
 
 module UberConfig
 
