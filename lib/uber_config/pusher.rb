@@ -2,7 +2,7 @@
 #desc 'Pushes config to IronCache and sets Heroku config variable.'
 #namespace :config do
 #  task :push do
-#    UberConfig.push
+#    UberConfig.push_heroku
 #  end
 #end
 
