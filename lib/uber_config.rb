@@ -52,6 +52,21 @@ module UberConfig
 
     file = options[:file] || "config"
     ext = options[:ext]
+    # let env variables override. Useful for things like minitest which don't allow you to pass in cli args to the tests. 
+    if ENV['CONFIGDIR']
+      dir = ENV['CONFIGDIR']
+    end
+    if ENV['CONFIGFILE']
+      file = ENV['CONFIGFILE']
+    end
+    # let cli args override
+    if ARGV.include?('--configdir')
+      dir = ARGV[ARGV.index('--configdir') + 1]
+    end
+    if ARGV.include?('--configfile')
+      file = ARGV[ARGV.index('--configfile') + 1]
+    end
+  
     filenames = []
     if file.include?(".") # then has extension
       filenames << file
@@ -83,8 +98,9 @@ module UberConfig
     # Now check near caller file
     filenames.each do |file|
       dir_and_file = dir.nil? ? [] : dir.dup
+      p dir_and_file
       dir_and_file << file
-      #p dir_and_file
+      p dir_and_file
       location = File.join(dir_and_file)
       #p location
       cf = File.expand_path(location, caller_dir)

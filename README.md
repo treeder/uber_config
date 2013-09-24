@@ -18,6 +18,12 @@ where with the different load() options.
 Here is the order of where it looks:
 
 - $abt_config global variable (for https://github.com/iron-io/abt)
+- HTTP url of an IronCache entry set in ENV['CONFIG_CACHE_KEY']
+- TODO: any http url set in ENV['CONFIGURL'], should parse body
+- look at directory set by ENV['CONFIGDIR']
+- look at directory set by cli argument --configdir
+- look for file name set by ENV['CONFIGFILE']
+- look for file name set by cli argument --configfile
 - directory of file that calls UberConfig.load
 - working directory
 - TODO: look at ~/configs/#{working_directory_name} directory
