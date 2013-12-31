@@ -118,7 +118,7 @@ module UberConfig
     filenames.each do |file|
       dropbox_folders = ["~", "Dropbox", "configs"]
       if dir
-        dropbox_folders = dropbox_folders + dir
+        dropbox_folders = dropbox_folders << dir
       else
         dropbox_folders = dropbox_folders << auto_dir_name
       end
