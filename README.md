@@ -12,7 +12,7 @@ Just run:
 
     config = UberConfig.load
 
-It will look `config.yml` or `config.json` by default. You can change what it will look for and
+It will look for `config.yml` or `config.json` by default. You can change what it will look for and
 where with the different load() options.
 
 Here is the order of where it looks:
@@ -31,3 +31,14 @@ Here is the order of where it looks:
 
 :dir can be used to change working_directory_name.
 
+## Store config in IronCache and using it with Heroku
+
+Add this to your Rakefile:
+
+```ruby
+task :push do
+   UberConfig.push_heroku
+end
+```
+
+Then `rake push`. 
