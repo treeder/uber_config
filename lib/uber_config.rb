@@ -79,16 +79,11 @@ module UberConfig
       end
     end
 
-    #p Kernel.caller
     caller_file = caller[0][0...(caller[0].index(":in"))]
     caller_file = caller_file[0...(caller_file.rindex(":"))]
-    #p caller_file
     caller_dir = File.dirname(caller_file)
-    #puts "caller_dir: " + caller_dir
     caller_dir = File.expand_path(caller_dir)
-    #puts "caller_dir: " + caller_dir
     caller_dir_split = caller_dir.split("/")
-    #p caller_dir_split
     auto_dir_name = caller_dir_split.last
     if auto_dir_name == "test"
       caller_dir_split.pop
@@ -98,11 +93,8 @@ module UberConfig
     # Now check near caller file
     filenames.each do |file|
       dir_and_file = dir.nil? ? [] : dir.dup
-      p dir_and_file
       dir_and_file << file
-      p dir_and_file
       location = File.join(dir_and_file)
-      #p location
       cf = File.expand_path(location, caller_dir)
       @config = load_from(cf)
       return @config if @config
@@ -146,7 +138,6 @@ module UberConfig
 
   def self.set_default_proc(hash)
     #puts 'setting default proc'
-    #p hash
     hash.default_proc = proc do |h, k|
       case k
         when String
